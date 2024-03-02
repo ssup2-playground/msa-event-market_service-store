@@ -27,16 +27,18 @@ jobs:
     - name: Prepare
       id: prepare
       run: |
-        DOCKER_IMAGE=ssup2-playground/msa-event-market-service-store
+        DOCKER_IMAGE=ghcr.io/ssup2-playground/msa-event-market-service-store
         DOCKER_PLATFORMS=linux/amd64,linux/arm64
+
         VERSION=""
         if [[ $GITHUB_REF == refs/tags/* ]]; then
           VERSION=${GITHUB_REF#refs/tags/v}
           TAGS="--tag ${DOCKER_IMAGE}:${VERSION} --tag ${DOCKER_IMAGE}:latest"
         else
-          VERSION=branch-${GITHUB_REF#refs/heads/}
-          TAGS="--tag ${DOCKER_IMAGE}:${VERSION} --tag ${DOCKER_IMAGE}:commit-${GITHUB_SHA::8}"
+          VERSION=commit-${GITHUB_SHA::8}
+          TAGS="--tag ${DOCKER_IMAGE}:${VERSION} --tag ${DOCKER_IMAGE}:branch-${GITHUB_REF#refs/heads/}"
         fi
+
         echo ::set-output name=docker_image::${DOCKER_IMAGE}
         echo ::set-output name=version::${VERSION}
         echo ::set-output name=buildx_args::--platform ${DOCKER_PLATFORMS} \
