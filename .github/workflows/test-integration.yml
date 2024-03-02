@@ -21,6 +21,11 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
 
+    - name: Set up Go 1.16
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
     - name: Set up MySQL
       uses: mirromutth/mysql-action@v1.1
       with:
@@ -37,7 +42,7 @@ jobs:
     - name: Build store service
       uses: gradle/gradle-build-action@v2
       with:
-        arguments: bootJar
+        arguments: bootRunEnv
 
     - name: Run store service and integration test
       run: |
