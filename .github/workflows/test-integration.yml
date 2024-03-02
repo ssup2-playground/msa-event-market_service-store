@@ -28,6 +28,9 @@ jobs:
         mysql database: 'local_store'
         mysql root password: 'root'
 
+    - name: Start Bitname Kafka
+      uses: bbcCorp/kafka-actions@v1
+
     - name: Install grpcurl
       run: go install github.com/fullstorydev/grpcurl/cmd/grpcurl@v1.8.2
 
