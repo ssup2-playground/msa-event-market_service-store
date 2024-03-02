@@ -47,6 +47,6 @@ jobs:
     - name: Run store service and integration test
       run: |
         . scripts/env-local && sudo -E java -jar build/libs/store-v1.jar &
-        sleep 30s
+        sleep 60s
         scripts/test-http-server.sh
         scripts/test-grpc-server.sh
