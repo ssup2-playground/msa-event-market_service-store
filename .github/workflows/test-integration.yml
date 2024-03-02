@@ -42,7 +42,7 @@ jobs:
     - name: Build store service
       uses: gradle/gradle-build-action@v2
       with:
-        arguments: bootRunEnv
+        arguments: bootJar
 
     - name: Run store service and integration test
       run: |
