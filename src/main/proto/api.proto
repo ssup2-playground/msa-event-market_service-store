@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_outer_classname = "StoreProto";
+option java_package = "com.market.store.proto";
+
+// Message
+message Empty {
+}
+
+// Store request 
+message StoreListReq {
+    int32 offset = 1;
+    int32 limit = 2;
+}
+
+message StoreIdReq {
+    string id = 1;
+}
+
+message StoreCreateReq {
+    string name = 1;
+    string description = 2;
+}
+
+message StoreUpdateReq {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+// Store response
+message StoreListRes {
+    repeated StoreInfoRes stores = 1;
+}
+
+message StoreInfoRes {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+// Product request
+message ProductListReq {
+    int32 offset = 1;
+    int32 limit = 2;
+    string storeId = 3;
+}
+
+message ProductIdReq {
+    string id = 1;
+    string storeId = 3;
+}
+
+message ProductCreateReq {
+    string name = 1;
+    string description = 2;
+    string storeId = 3;
+    int32 quantity = 4;
+}
+
+message ProductUpdateReq {
+    string id = 1;
+    string storeId = 2;
+    string name = 3;
+    string description = 4;
+    int32 quantity = 5;
+}
+
+message ProductQuantityReq {
+    string id = 1;
+    string storeId = 2;
+    int32 quantity = 3;
+}
+
+// Product response
+message ProductListRes {
+    repeated ProductInfoRes products = 1;
+}
+
+message ProductInfoRes {
+    string id = 1;
+    string storeId = 2;
+    string name = 3;
+    string description = 4;
+    int32 quantity = 5;
+}
+
+message ProductQuantityRes {
+    string id = 1;
+    int32 quantity = 2;
+}
+
+// Store service
+service Store {
+    rpc ListStore(StoreListReq) returns (StoreListRes) {}
+    rpc CreateStore(StoreCreateReq) returns (StoreInfoRes) {}
+    rpc GetStore(StoreIdReq) returns (StoreInfoRes) {}
+    rpc UpdateStore(StoreUpdateReq) returns (Empty) {}
+    rpc DeleteStore(StoreIdReq) returns (Empty) {}
+}
+
+// Product service
+service Product {
+    rpc ListProduct(ProductListReq) returns (ProductListRes) {}
+    rpc CreateProduct(ProductCreateReq) returns (ProductInfoRes) {}
+    rpc GetProduct(ProductIdReq) returns (ProductInfoRes) {}
+    rpc UpdateProduct(ProductUpdateReq) returns (Empty) {}
+    rpc DeleteProduct(ProductIdReq) returns (Empty) {}
+    rpc IncreaseQuantityProduct(ProductQuantityReq) returns (ProductQuantityRes) {}
+    rpc DecreaseQuantityProduct(ProductQuantityReq) returns (ProductQuantityRes) {}
+}

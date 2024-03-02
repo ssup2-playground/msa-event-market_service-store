@@ -1,0 +1,159 @@
+buildscript {
+	ext {
+        protobufVersion = '3.17.3'
+        protobufPluginVersion = '0.8.16'
+        grpcVersion = '1.42.1'
+    }
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.5.6'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+	id 'com.google.protobuf' version "${protobufPluginVersion}"
+}
+
+group = 'com.market'
+version = 'v1'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+ext {
+	set('springCloudVersion', "2020.0.4")
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-aop:2.5.6'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.6'
+	implementation 'org.springframework.boot:spring-boot-starter-security:2.5.6'
+	implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.6'
+	implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator:2.5.6'
+	implementation 'org.springframework.kafka:spring-kafka:2.8.0'
+	implementation 'org.springframework.cloud:spring-cloud-starter-sleuth:3.1.0'
+	implementation 'org.springframework.cloud:spring-cloud-sleuth-zipkin:3.1.0'
+	implementation 'net.devh:grpc-server-spring-boot-starter:2.13.1.RELEASE'
+	implementation 'io.zipkin.brave:brave-instrumentation-grpc:5.13.7'
+	implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+	implementation 'org.modelmapper:modelmapper:2.4.2'
+	implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.5.13'
+    
+    compileOnly 'jakarta.annotation:jakarta.annotation-api:1.3.5'
+	compileOnly 'org.projectlombok:lombok:1.18.22'
+	runtimeOnly 'mysql:mysql-connector-java:8.0.27'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+	annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.6'
+	testImplementation 'org.springframework.security:spring-security-test:5.6.0'
+	testImplementation 'org.springframework.kafka:spring-kafka-test:2.8.0'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
+
+bootJar {
+    layered()
+}
+
+test {
+	useJUnitPlatform()
+}
+
+// Custom tasks
+task initLocal {
+	group 'Application'
+	description 'Setup up local development environment'
+	doLast {
+		exec {
+			commandLine 'sh', '-c', 'docker run --name msa-event-market-store-local-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=local_store -d mysql:8.0'
+		}
+		exec {
+			commandLine 'sh', '-c', 'docker-compose -f scripts/kafka-compose.yaml up -d'
+		}
+	}
+}
+
+task bootRunEnv(type: Exec) {
+	group 'Application'
+	description 'Runs this project as a Spring Boot application with env'
+	commandLine 'sh', '-c', '. scripts/env-local && exec ./gradlew bootRun'
+}
+
+task genSwaggerSpec(type: Exec) {
+	group 'Application'
+	description 'Generate swagger spec'
+	commandLine 'sh', '-c', 'echo "var api_spec =" > api/openapi/api.json.js && curl http://localhost/v1/swagger/spec | jq \'.servers[0].url="http:://msa-event-market.com" | .servers[0].description="msa-event-market store service"\' >> api/openapi/api.json.js'
+}
+
+task buildDockerfile(type: Exec) {
+	group 'Build'
+	description 'Builds an Container Image from Dockerfile'
+	commandLine 'sh', '-c', './gradlew bootJar && docker build .'
+}
+
+task checkEnv(type: Exec) {
+	group 'Verification'
+	description 'Runs all checks with env'
+	commandLine 'sh', '-c', '. scripts/env-local && ./gradlew test'
+}
+
+task testEnv(type: Exec) {
+	group 'Verification'
+	description 'Runs the unit tests with env'
+	commandLine 'sh', '-c', '. scripts/env-local && ./gradlew test'
+}
+
+task testIntegrationEnv(type: Exec) {
+	group 'Verification'
+	description 'Runs the integration tests with env'
+	commandLine 'sh', '-c', 'scripts/test-http-server.sh && scripts/test-grpc-server.sh'
+}
+
+task testAction(type: Exec) {
+	group 'Verification'
+	description 'Runs tests through act (github action)'
+	commandLine 'sh', '-c', 'act push --workflows ./.github/workflows/test-unit.yml -P ubuntu-20.04=ghcr.io/catthehacker/ubuntu:act-20.04'
+	commandLine 'sh', '-c', 'act workflow_run --workflows ./.github/workflows/test-integration.yml -P ubuntu-20.04=ghcr.io/catthehacker/ubuntu:act-20.04'
+}

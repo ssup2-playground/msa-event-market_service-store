@@ -1,0 +1,26 @@
+# MySQL
+export MYSQL_DATABASE=local_store
+
+export MYSQL_PRIMARY_IP=localhost
+export MYSQL_PRIMARY_PORT=3306
+export MYSQL_PRIMARY_USER=root
+export MYSQL_PRIMARY_PASSWORD=root
+
+export MYSQL_SECONDARY_IP=localhost
+export MYSQL_SECONDARY_PORT=3306
+export MYSQL_SECONDARY_USER=root
+export MYSQL_SECONDARY_PASSWORD=root
+
+# Kafka
+export KAFKA_TOPIC_PREFIX=local
+export KAFKA_GROUPID_PREFIX=local
+export KAFKA_CONSUMER_IP=localhost
+export KAFKA_CONSUMER_PORT=9092
+
+# Zipkin
+export ZIPKIN_ENABLED=false
+export ZIPKIN_BASE_URL=""
+
+# ETC
+export PROFILE_ACTIVE=local
+export LOGGER_LEVEL=info

@@ -1,0 +1,39 @@
+name: test-unit
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Set up MySQL
+      uses: mirromutth/mysql-action@v1.1
+      with:
+        mysql version: '8.0'
+        mysql database: 'local_store'
+        mysql root password: 'root'
+        
+    - name: Run unit test
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: testEnv
+
+    - name: Run build test
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: bootJar
