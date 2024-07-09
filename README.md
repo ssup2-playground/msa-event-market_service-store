@@ -3,8 +3,14 @@
 service-store is the service responsible for store and product management in the [msa-event-market](https://github.com/ssup2-playground/project_msa-event-market) Project. service-store follows this [considerations](https://github.com/ssup2-playground/project_msa-event-market?tab=readme-ov-file#service-considerations)
 
 * Architecture
+
+<img src="/images/architecture.png" width="500"/>
+
 * ER Diagram
-* Swagger
+
+<img src="/images/er-diagram.png" width="700"/>
+
+* [Swagger](https://ssup2-playground.github.io/msa-event-market_service-store/api/openapi/swagger.html)
 
 ## Used main maven repos and tools
 
