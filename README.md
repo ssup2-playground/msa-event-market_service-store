@@ -4,7 +4,7 @@ service-store is the service responsible for store and product management in the
 
 * Architecture
 
-<img src="/images/architecture.png" width="500"/>
+<img src="/images/architecture.png" width="600"/>
 
 * ER Diagram
 
